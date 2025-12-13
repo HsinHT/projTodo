@@ -118,11 +118,3 @@ npm run dev
 
 ## 📝 License
 Distributed under the MIT License. See LICENSE for more information.
-
----
-
-Render
-https://projtodo.onrender.com
-
-Vercel
-proj-todo-ten.vercel.app
