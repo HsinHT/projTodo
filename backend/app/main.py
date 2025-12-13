@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from typing import List
+# 匯入 IntegrityError 以捕捉資料庫錯誤
+from sqlalchemy.exc import IntegrityError
 
 # 匯入定義的模組
 from . import models, schemas, crud, database, auth
@@ -24,22 +26,13 @@ origins = [
     "http://localhost",
     "http://localhost:5173", # Vite 預設 port
     "http://127.0.0.1:5173",
-    # 之後你會在這裡加入 Vercel 的網址，例如：
-    # "https://your-project-name.vercel.app" 
-    "*" # 為了方便測試，暫時允許所有來源 (生產環境建議改回特定網域)
+    "https://proj-todo-ten.vercel.app" # Vercel 前端網址
 ]
 
 # 設定 CORS，允許前端呼叫
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=origins, # 生產環境應設為特定網域
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"]
-# )
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # 暫時設為允許所有，以免部署後遇到 CORS 錯誤 debug 很痛苦
+    allow_origins=origins, # 生產環境應設為特定網域
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
@@ -81,13 +74,21 @@ def login_for_access_token(
 @app.post("/users/", response_model=schemas.User)
 def register_user(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     """註冊新使用者"""
+    # 先檢查是否存在
     db_user = crud.get_user_by_username(db, username=user.username)
     if db_user:
         raise HTTPException(status_code=400, detail="Username already registered")
 
-    # 注意：這裡呼叫 crud.create_user 時，裡面應該要呼叫 auth.get_password_hash
-    # 為了確保邏輯完整，我們稍後確認 crud.create_user 的實作
-    return crud.create_user(db=db, user=user)
+    # 嘗試寫入，並捕捉可能的重複錯誤 (雙重保險)
+    try:
+        return crud.create_user(db=db, user=user)
+    except IntegrityError:
+        db.rollback() # 資料庫回滾
+        raise HTTPException(status_code=400, detail="Username already registered (Integrity Error)")
+    except Exception as e:
+        db.rollback()
+        print(f"Error creating user: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 @app.get("/users/me", response_model=schemas.User)
