@@ -1,0 +1,33 @@
+# Python / Backend
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Database (不要上傳本地資料庫)
+*.db
+*.sqlite3
+sql_app.db
+
+# Node / Frontend
+node_modules/
+dist/
+build/
+.DS_Store
+
+# Environment Variables (不要上傳機密設定)
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+
+docs/
