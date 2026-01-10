@@ -30,4 +30,7 @@ build/
 .vscode/
 .idea/
 
+.opencode/
 docs/
+openspec/
+AGENTS.md
