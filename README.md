@@ -27,13 +27,21 @@
 *   **Framework**: FastAPI
 *   **Database**: SQLite (透過 SQLAlchemy ORM)
 *   **Authentication**: Python-Jose (JWT), Passlib (Bcrypt)
-*   **Validation**: Pydantic
+*   **Validation**: Pydantic v2
+*   **Server**: Uvicorn
 
 ### Frontend
-*   **Build Tool**: Vite
-*   **Library**: React (Hooks, Context API)
-*   **Language**: TypeScript
-*   **Styling**: TailwindCSS
+*   **Build Tool**: Vite 6.x
+*   **Library**: React 19
+*   **Language**: TypeScript 5.x
+*   **Styling**: TailwindCSS 3.4.17
+*   **Package Manager**: npm
+*   **Drag & Drop**: @dnd-kit/core, @dnd-kit/sortable
+
+### DevOps
+*   **Containerization**: Docker Compose for development environment
+*   **CI/CD**: GitHub Actions (.github/workflows/ci.yml)
+*   **CORS**: Configured for localhost:5173, localhost, and production Vercel URL
 
 ---
 
@@ -47,14 +55,14 @@
    cd repo-name
    ```
 
-1. 啟動服務
-```
+2. 啟動服務
+```powershell
 docker-compose up --build
 ```
 
-2. 開啟瀏覽器
-。 前端頁面：http://localhost:5173
-。 後端 API 文件：http://localhost:8000/docs
+3. 開啟瀏覽器
+   - 前端頁面：http://localhost:5173
+   - 後端 API 文件：http://localhost:8000/docs
 
 ---
 
@@ -62,10 +70,10 @@ docker-compose up --build
 
 > 如果您不使用 Docker，請依照以下步驟在 Windows PowerShell 中分別啟動後端與前端。
 
-1. 後端設定 (Backend)
+### 1. 後端設定 (Backend)
 
 > 請開啟一個 PowerShell 視窗：
-```
+```powershell
 # 進入 backend 資料夾
 cd backend
 
@@ -83,14 +91,14 @@ uvicorn app.main:app --reload
 ```
 - 後端將運行於 http://localhost:8000
 
-2. 前端設定 (Frontend)
+### 2. 前端設定 (Frontend)
 
 > 請開啟另一個 PowerShell 視窗：
-```
+```powershell
 # 進入 frontend 資料夾
 cd frontend
 
-# 安裝依賴 (建議使用 npm)
+# 安裝依賴
 npm install
 
 # 確保 .env 檔案存在 (若無請建立)
@@ -100,6 +108,15 @@ npm install
 npm run dev
 ```
 - 前端將運行於 http://localhost:5173
+
+### 3. 其他可用指令
+
+**Frontend:**
+```powershell
+npm run build      # 建置生產版本
+npm run lint       # 執行程式碼檢查
+npm run preview    # 預覽生產版本
+```
 
 ---
 
@@ -124,9 +141,9 @@ npm run dev
 
 *   **工作**（藍色）：與工作相關的任務
 *   **個人**（紫色）：個人事務和活動
-*   **購物**（綠色）：購物清單和採買任務
-*   **健康**（黃色）：健康、運動和醫療相關任務
-*   **其他**（紅色）：其他類別的任務
+*   **購物**（粉色）：購物清單和採買任務
+*   **健康**（綠色）：健康、運動和醫療相關任務
+*   **其他**（灰色）：其他類別的任務
 
 ---
 
@@ -136,30 +153,95 @@ npm run dev
 
 *   **高**（紅色）：緊急且重要的任務，需要優先處理
 *   **中**（黃色）：一般重要性的任務
-*   **低**（藍色）：可以延後處理的任務
+*   **低**（綠色）：可以延後處理的任務
 
 ---
 
 ## 📂 專案結構
+
 ```
 .
-├── backend/            # FastAPI 應用程式
-│   ├── app/            # 核心邏輯 (Models, Schemas, CRUD, Auth)
-│   └── sql_app.db      # SQLite 資料庫 (自動生成)
-├── frontend/           # React 應用程式
-│   ├── src/            # 原始碼 (Components, Context, Hooks)
-│   └── .env            # 前端環境變數
-└── docker-compose.yml  # Docker 編排設定
+├── backend/              # FastAPI 應用程式
+│   ├── app/             # 核心邏輯 (Models, Schemas, CRUD, Auth)
+│   ├── requirements.txt # Python 依賴
+│   └── sql_app.db       # SQLite 資料庫 (自動生成)
+├── frontend/            # React 應用程式
+│   ├── src/             # 原始碼 (Components, Context, Hooks, Types)
+│   ├── package.json     # Node.js 依賴
+│   └── .env             # 前端環境變數
+├── .github/             # GitHub Actions CI/CD
+│   └── workflows/
+│       └── ci.yml       # CI/CD 配置
+├── docs/                # 專案文件
+├── openspec/            # OpenSpec 變更提案與規格
+└── docker-compose.yml   # Docker 編排設定
 ```
+
+---
+
+## 🧪 測試策略
+
+目前專案採用手動測試策略：
+
+*   **後端測試**：透過 FastAPI 自動生成的 API 文件進行測試 (http://localhost:8000/docs)
+*   **前端測試**：透過瀏覽器開發者工具進行測試
+*   **CI/CD**：GitHub Actions 自動執行建置與基本檢查
+
+未來可考慮加入自動化測試框架（如 pytest for backend, Jest/Vitest for frontend）。
+
+---
+
+## 🔄 Git Workflow
+
+專案使用標準 Git workflow：
+
+*   主要分支：`main`
+*   開發流程：建立功能分支 → 提交變更 → 提交 Pull Request → 程式碼審查 → 合併
+*   CI/CD：透過 GitHub Actions 自動執行檢查
 
 ---
 
 ## ⚠️ 注意事項
-• 資料庫：預設使用 SQLite (sql_app.db)，該檔案會在後端啟動時自動建立。若使用 Docker，重新建立 Container 可能會導致資料遺失（除非設定 Volume 持久化）。
-• Bcrypt 版本：本專案為了解決相容性問題，指定使用 bcrypt==3.2.2。
-• API 網址：前端透過 .env 中的 VITE_API_URL 連接後端，部署時請記得修改此變數
+
+### 資料庫
+*   **開發環境**：預設使用 SQLite (sql_app.db)，該檔案會在後端啟動時自動建立
+*   **生產環境**：建議使用 PostgreSQL 以提升效能與可靠性（需修改 database.py 連接設定）
+*   **資料持久化**：若使用 Docker，重新建立 Container 可能會導致資料遺失（除非設定 Volume 持久化）
+
+### 依賴版本
+*   **Bcrypt 版本**：本專案為了解決相容性問題，指定使用 `bcrypt==3.2.2`
+*   **更新依賴**：更新套件時請注意相容性，特別是 bcrypt
+
+### API 配置
+*   **API 網址**：前端透過 `.env` 中的 `VITE_API_URL` 連接後端，部署時請記得修改此變數
+*   **CORS 設定**：生產環境 URL 硬式編碼為 `https://proj-todo-ten.vercel.app`，部署到其他環境時請更新 `backend/app/main.py` 中的 `origins` 清單
+
+### 認證
+*   **Token 存儲**：JWT token 存儲在 localStorage（較不安全但實作簡單）
+*   **Token 過期**：Token 有效期為 30 分鐘，過期後需重新登入
+
+---
+
+## 📦 外部相依套件
+
+### Backend
+*   FastAPI - 現代化、高效能的 Web 框架
+*   Uvicorn - ASGI 伺服器
+*   SQLAlchemy - Python SQL 工具包與 ORM
+*   Pydantic v2 - 資料驗證與設定管理
+*   python-jose[cryptography] - JWT token 處理
+*   Passlib - 密碼雜湊庫
+*   bcrypt - 密碼加密演算法
+
+### Frontend
+*   React 19 - UI 函式庫
+*   Vite 6.x - 前端建置工具
+*   TypeScript - 型別安全的 JavaScript 超集
+*   TailwindCSS 3.4.17 - 實用優先的 CSS 框架
+*   @dnd-kit/core, @dnd-kit/sortable - 拖曳排序功能
 
 ---
 
 ## 📝 License
+
 Distributed under the MIT License. See LICENSE for more information.
