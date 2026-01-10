@@ -54,6 +54,30 @@ export const registerUser = async (username: string, password: string) => {
     return res.json()
 }
 
+// 取得當前使用者資訊
+export const getCurrentUser = async () => {
+    const res = await fetch(`${API_URL}/users/me`, {
+        headers: getAuthHeaders(),
+    })
+
+    if (!res.ok) throw new Error("Failed to get current user")
+
+    return res.json()
+}
+
+// 更新使用者資訊
+export const updateUser = async (userUpdate: { display_name?: string, avatar?: string }) => {
+    const res = await fetch(`${API_URL}/users/me`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(userUpdate),
+    })
+
+    if (!res.ok) throw new Error("Failed to update user")
+
+    return res.json()
+}
+
 // 獲取 Todos (帶上 Token)
 export const getTodos = async () => {
     try {
@@ -89,7 +113,7 @@ export const createTodo = async (title: string) => {
 }
 
 // 更新 Todo (用於修改標題或切換完成狀態)
-export const updateTodo = async (id: number, todo: { title: string, completed: boolean}) => {
+export const updateTodo = async (id: number, todo: { title?: string, completed?: boolean, order?: number }) => {
     const res = await fetch(`${API_URL}/todos/${id}`, {
         method: "PUT",
         headers: getAuthHeaders(),
@@ -111,4 +135,17 @@ export const deleteTodo = async (id: number) => {
     if (!res.ok) throw new Error("Failed to delete todo")
 
     return res.json() // 後端回傳 { ok: true }
+}
+
+// 重新排序 Todos
+export const reorderTodos = async (todos: { id: number; order: number }[]) => {
+    const res = await fetch(`${API_URL}/todos/reorder`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(todos),
+    })
+
+    if (!res.ok) throw new Error("Failed to reorder todos")
+
+    return res.json()
 }

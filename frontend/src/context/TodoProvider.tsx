@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 // 使用 'import type' 來引入型別
 import type { Todo } from '../types'
-import { createTodo, getTodos, updateTodo, deleteTodo } from '../api/client'
+import { createTodo, getTodos, updateTodo, deleteTodo, reorderTodos } from '../api/client'
 import { TodoContext } from './TodoContext'
 
 export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -14,7 +14,9 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         getTodos()
             .then((data) => {
-                setTodos(data)
+                // 將 todos 依照 order 排序
+                const sortedTodos = [...data].sort((a, b) => a.order - b.order)
+                setTodos(sortedTodos)
             })
             .catch((err) => {
                 console.error("Failed to fetch todos", err)
@@ -36,7 +38,7 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     // 更新邏輯
-    const updateTodoItem = async (id: number, updates: { title: string, completed: boolean }) => {
+    const updateTodoItem = async (id: number, updates: Partial<Todo>) => {
         try {
             // 先呼叫後端
             // 將變變命名為 updatedTodo，避免與函式名稱衝突
@@ -59,8 +61,38 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }
 
+    // 重新排序邏輯
+    const reorderTodoItem = async (oldIndex: number, newIndex: number) => {
+        try {
+            // 更新本地狀態 (樂觀更新)
+            setTodos((prev) => {
+                const newTodos = [...prev]
+                const [removed] = newTodos.splice(oldIndex, 1)
+                newTodos.splice(newIndex, 0, removed)
+
+                // 更新每個 todo 的 order 值
+                const updatedTodos = newTodos.map((todo, index) => ({
+                    ...todo,
+                    order: index
+                }))
+
+                // 呼叫後端 API 更新排序
+                reorderTodos(updatedTodos.map((todo) => ({ id: todo.id, order: todo.order })))
+                    .catch((error) => {
+                        console.error("Failed to reorder todos", error)
+                        // 如果失敗，回復原始順序
+                        setTodos(prev)
+                    })
+
+                return updatedTodos
+            })
+        } catch(error) {
+            console.error("Failed to reorder todo", error)
+        }
+    }
+
     return (
-        <TodoContext.Provider value={{ todos, addTodo, updateTodoItem, deleteTodoItem, loading }}>
+        <TodoContext.Provider value={{ todos, addTodo, updateTodoItem, deleteTodoItem, reorderTodoItem, loading }}>
             {children}
         </TodoContext.Provider>
     )

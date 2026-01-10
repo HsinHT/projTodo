@@ -25,7 +25,9 @@ app = FastAPI(
 origins = [
     "http://localhost",
     "http://localhost:5173", # Vite 預設 port
+    "http://localhost:5174", # Vite alternative port
     "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174",
     "https://proj-todo-ten.vercel.app" # Vercel 前端網址
 ]
 
@@ -97,6 +99,23 @@ def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
     return current_user
 
 
+@app.put("/users/me", response_model=schemas.User)
+def update_user_me(
+    user_update: schemas.UserUpdate,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """更新當前登入使用者的資訊"""
+    if user_update.display_name is not None:
+        current_user.display_name = user_update.display_name
+    if user_update.avatar is not None:
+        current_user.avatar = user_update.avatar
+    
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
 # Todo Endpoints (任務路由)
 
 @app.get("/todos/", response_model=List[schemas.Todo])
@@ -124,10 +143,29 @@ def create_todo(
     return crud.create_user_todo(db=db, todo=todo, user_id=current_user.id)
 
 
+@app.put("/todos/reorder")
+def reorder_todos(
+    todo_orders: List[schemas.TodoOrder],
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """重新排序任務"""
+    for todo_order in todo_orders:
+        db_todo = db.query(models.Todo).filter(
+            models.Todo.id == todo_order.id,
+            models.Todo.owner_id == current_user.id
+        ).first()
+        if db_todo:
+            db_todo.order = todo_order.order
+
+    db.commit()
+    return { "ok": True }
+
+
 @app.put("/todos/{todo_id}", response_model=schemas.Todo)
 def update_todo(
     todo_id: int,
-    todo_update: schemas.TodoCreate,
+    todo_update: schemas.TodoUpdate,
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(auth.get_current_user)
 ):
@@ -136,9 +174,15 @@ def update_todo(
     if db_todo is None:
         raise HTTPException(status_code=404, detail="Todo not found")
 
-    db_todo.title = todo_update.title
-    db_todo.description = todo_update.description
-    db_todo.completed = todo_update.completed
+    if todo_update.title is not None:
+        db_todo.title = todo_update.title
+    if todo_update.description is not None:
+        db_todo.description = todo_update.description
+    if todo_update.completed is not None:
+        db_todo.completed = todo_update.completed
+    if todo_update.order is not None:
+        db_todo.order = todo_update.order
+    
     db.commit()
     db.refresh(db_todo)
 

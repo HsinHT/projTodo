@@ -8,8 +8,9 @@ export interface TodoContextType {
     todos: Todo[]
     addTodo: (title: string) => Promise<void>
     // 定義更新與刪除函式簽章
-    updateTodoItem: (id: number, updates: { title: string, completed: boolean }) => Promise<void>
+    updateTodoItem: (id: number, updates: Partial<Todo>) => Promise<void>
     deleteTodoItem: (id: number) => Promise<void>
+    reorderTodoItem: (oldIndex: number, newIndex: number) => Promise<void>
     loading: boolean
 }
 

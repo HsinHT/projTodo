@@ -1,111 +1,173 @@
-// frontend\src\components\Register.tsx
-
-import React, { useState } from "react"
-import { registerUser } from "../api/client"
+import React, { useState } from 'react'
+import { registerUser } from '../api/client'
 
 interface RegisterProps {
-    onSwitchToLogin: () => void // 註冊成功或點擊切換時呼叫
+  onSwitchToLogin: () => void
 }
 
 const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
-    const [username, setUsername] = useState("")
-    const [password, setPassword] = useState("")
-    const [confirmPassword, setConfirmPassword] = useState("")
-    const [error, setError] = useState("")
-    const [success, setSuccess] = useState(false)
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setError("")
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
 
-        // 前端基本驗證
-        if (password !== confirmPassword) {
-            setError("兩次輸入的密碼不一致")
-            return
-        }
-
-        if (password.length < 8) {
-            setError("密碼長度至少需 8 個字元")
-            return
-        }
-
-        try {
-            await registerUser(username, password)
-            setSuccess(true)
-            // 延遲 1.5 秒後自動跳轉到登入頁
-            setTimeout(() => {
-                onSwitchToLogin()
-            }, 1500)
-        } catch(err) {
-            // 檢查 err 是否為標準 Error 物件的實例
-            if (err instanceof Error) {
-                setError(err.message)
-            } else {
-                // 如果拋出的不是 Error 物件 (極少見，但在 JS 中是可能的)，給一個預設訊息
-                setError("註冊失敗")
-            }
-        }
+    if (password !== confirmPassword) {
+      setError('兩次輸入的密碼不一致')
+      return
     }
 
-    if (success) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-                <div className="bg-green-100 p-6 rounded shadow-md text-center">
-                    <h2 className="text-xl font-bold text-green-700 mb-2">註冊成功！</h2>
-                    <p>正為您跳轉至登入頁…</p>
-                </div>
-            </div>
-        )
+    if (password.length < 8) {
+      setError('密碼長度至少需 8 個字元')
+      return
     }
 
+    try {
+      await registerUser(username, password)
+      setSuccess(true)
+      setTimeout(() => {
+        onSwitchToLogin()
+      }, 1500)
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('註冊失敗')
+      }
+    }
+  }
+
+  if (success) {
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-            <div className="bg-white p-6 rounded shadow-md w-80">
-                <h2 className="text-xl font-bold mb-4 text-center">
-                    註冊帳號
-                </h2>
-
-                { error && <div className="bg-red-100 text-red-700 p-2 text-sm rounded mb-4">{error}</div> }
-
-                <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
-                    <input
-                        className="border p-2 rounded"
-                        type="text"
-                        placeholder="帳號"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        required
-                    />
-                    <input
-                        className="border p-2 rounded"
-                        type="password"
-                        placeholder="密碼"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                    <input
-                        className="border p-2 rounded"
-                        type="password"
-                        placeholder="確認密碼"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        required
-                    />
-                    <button className="bg-green-600 text-white p-2 rounded hover:bg-green-700 transition" type="submit">
-                        註冊
-                    </button>
-                </form>
-
-                <div className="mt-4 text-sm text-center text-gray-600">
-                    已有帳號？
-                    <button className="text-blue-500 underline ml-1" onClick={onSwitchToLogin}>
-                        馬上登入
-                    </button>
-                </div>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4">
+        <div className="w-full max-w-md">
+          <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl text-center animate-scale-in">
+            <div className="w-20 h-20 mx-auto mb-4 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+              <svg className="w-10 h-10 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
             </div>
+            <h2 className="text-2xl font-bold text-green-700 dark:text-green-400 mb-2">
+              註冊成功！
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              正為您跳轉至登入頁…
+            </p>
+          </div>
         </div>
+      </div>
     )
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8 animate-fade-in">
+          <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            建立新帳號
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            填寫以下資訊開始使用
+          </p>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl animate-scale-in">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm animate-slide-in">
+              {error}
+            </div>
+          )}
+
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+            <div>
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                帳號
+              </label>
+              <input
+                id="username"
+                type="text"
+                placeholder="請輸入帳號"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-green-500 focus:ring-2 focus:ring-green-200 dark:focus:ring-green-800 outline-none transition-all"
+                required
+                autoFocus
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                密碼
+              </label>
+              <input
+                id="password"
+                type="password"
+                placeholder="至少 8 個字元"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-green-500 focus:ring-2 focus:ring-green-200 dark:focus:ring-green-800 outline-none transition-all"
+                required
+                minLength={8}
+              />
+              {password && (
+                <p className={`mt-1 text-xs ${password.length >= 8 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                  {password.length}/8 字元
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                確認密碼
+              </label>
+              <input
+                id="confirmPassword"
+                type="password"
+                placeholder="請再次輸入密碼"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-green-500 focus:ring-2 focus:ring-green-200 dark:focus:ring-green-800 outline-none transition-all"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={!username || !password || !confirmPassword || password.length < 8 || password !== confirmPassword}
+              className="w-full px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 disabled:from-gray-300 disabled:to-gray-400 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 disabled:cursor-not-allowed disabled:shadow-none focus-ring"
+            >
+              註冊
+            </button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              已有帳號？
+              <button
+                onClick={onSwitchToLogin}
+                className="ml-1 text-green-600 dark:text-green-400 font-medium hover:underline focus-ring rounded"
+              >
+                馬上登入
+              </button>
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-8 text-center text-xs text-gray-500 dark:text-gray-400">
+          <p>© 2025 Todo List. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export default Register
