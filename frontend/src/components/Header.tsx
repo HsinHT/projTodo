@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../hooks/useTheme'
 import { Settings } from './Settings'
+import { Avatar } from './Avatar'
 
 interface HeaderProps {
   onLogout: () => void
@@ -11,64 +12,16 @@ export const Header: React.FC<HeaderProps> = ({ onLogout }) => {
   const { theme, toggleTheme } = useTheme()
   const { user } = useAuth()
   const [showSettings, setShowSettings] = useState(false)
-  
+
   const displayName = user?.display_name || user?.username || 'User'
-  const avatarColor = getAvatarColor(displayName)
-  
-  function getAvatarColor(name: string): string {
-    const colors = [
-      'from-blue-500 to-purple-600',
-      'from-pink-500 to-rose-600',
-      'from-green-500 to-teal-600',
-      'from-yellow-500 to-orange-600',
-      'from-indigo-500 to-blue-600',
-      'from-red-500 to-pink-600',
-    ]
-    let hash = 0
-    for (let i = 0; i < name.length; i++) {
-      hash = name.charCodeAt(i) + ((hash << 5) - hash)
-    }
-    return colors[Math.abs(hash) % colors.length]
-  }
-  
-  function getAvatarStyle(): string {
-    if (!user?.avatar) return avatarColor
-    if (user.avatar.startsWith('https://')) return ''
-    if (user.avatar.length === 2) return avatarColor
-    return user.avatar
-  }
-  
-  function getAvatarContent(): React.ReactNode {
-    if (user?.avatar?.startsWith('https://')) {
-      return <img 
-        src={user.avatar} 
-        alt={displayName}
-        className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-700"
-        onError={() => {}}
-      />
-    }
-    if (user?.avatar?.length === 2) {
-      return (
-        <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${avatarColor} flex items-center justify-center text-white font-bold text-lg`}>
-          {user.avatar}
-        </div>
-      )
-    }
-    const color = user?.avatar || avatarColor
-    return (
-      <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${color} flex items-center justify-center text-white font-bold text-lg`}>
-        {displayName.charAt(0).toUpperCase()}
-      </div>
-    )
-  }
-  
+
   return (
     <>
       <header className="sticky top-0 z-10 backdrop-blur-lg bg-white/80 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              {getAvatarContent()}
+              <Avatar displayName={displayName} avatar={user?.avatar} size={40} />
               <div>
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">
                   Todo List

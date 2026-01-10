@@ -453,4 +453,15 @@ openspec validate --strict # Is it correct?
 openspec archive <change-id> [--yes|-y]  # Mark complete (add --yes for automation)
 ```
 
+### Project Guidelines & Principles
+
+#### Architecture
+- **KISS**: Keep logic simple.
+- **DRY**: Abstract repeated logic into utilities.
+- **SOLID**: Enforce SRP and DIP in all classes.
+
+#### Code Quality
+- All public functions must have unit tests.
+- Fail Fast: Throw exceptions early for invalid states.
+
 Remember: Specs are truth. Changes are proposals. Keep them in sync.

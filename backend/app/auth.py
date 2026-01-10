@@ -1,4 +1,5 @@
 # backend\app\auth.py
+import os
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta
@@ -9,8 +10,7 @@ from sqlalchemy.orm import Session
 from . import schemas, database, models
 
 
-# 設定密鑰 (在生產環境中，這應該從環境變數 os.getenv 讀取)
-SECRET_KEY = "YOUR_SUPER_SECRET_KEY_CHANGE_ME_IN_PRODUCTION"
+SECRET_KEY = os.getenv("SECRET_KEY", "YOUR_SUPER_SECRET_KEY_CHANGE_ME_IN_PRODUCTION")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES =30
 

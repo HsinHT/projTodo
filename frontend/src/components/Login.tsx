@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
+import { Input } from './Input'
+import { Button } from './Button'
 
 interface LoginProps {
   onSwitchToRegister: () => void
@@ -47,44 +49,35 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
           )}
 
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                帳號
-              </label>
-              <input
-                id="username"
-                type="text"
-                placeholder="請輸入帳號"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 outline-none transition-all"
-                required
-                autoFocus
-              />
-            </div>
+            <Input
+              id="username"
+              type="text"
+              label="帳號"
+              placeholder="請輸入帳號"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              autoFocus
+            />
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                密碼
-              </label>
-              <input
-                id="password"
-                type="password"
-                placeholder="請輸入密碼"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 outline-none transition-all"
-                required
-              />
-            </div>
+            <Input
+              id="password"
+              type="password"
+              label="密碼"
+              placeholder="請輸入密碼"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
 
-            <button
+            <Button
               type="submit"
+              variant="gradient"
+              fullWidth
               disabled={!username || !password}
-              className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-400 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 disabled:cursor-not-allowed disabled:shadow-none focus-ring"
             >
               登入
-            </button>
+            </Button>
           </form>
 
           <div className="mt-6 text-center">

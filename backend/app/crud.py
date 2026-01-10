@@ -1,10 +1,6 @@
 # backend\app\crud.py
 from sqlalchemy.orm import Session
-from passlib.context import CryptContext
 from . import models, schemas, auth
-
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def get_user(db: Session, user_id: int):
@@ -38,3 +34,6 @@ def create_user_todo(db: Session, todo: schemas.TodoCreate, user_id: int):
 
 def get_todos(db: Session, skip: int = 0, limit: int =100):
     return db.query(models.Todo).offset(skip).limit(limit).all()
+
+def get_user_todos(db: Session, user_id: int, skip: int = 0, limit: int = 100):
+    return db.query(models.Todo).filter(models.Todo.owner_id == user_id).offset(skip).limit(limit).all()

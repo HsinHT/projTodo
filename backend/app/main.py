@@ -76,21 +76,11 @@ def login_for_access_token(
 @app.post("/users/", response_model=schemas.User)
 def register_user(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     """註冊新使用者"""
-    # 先檢查是否存在
-    db_user = crud.get_user_by_username(db, username=user.username)
-    if db_user:
-        raise HTTPException(status_code=400, detail="Username already registered")
-
-    # 嘗試寫入，並捕捉可能的重複錯誤 (雙重保險)
     try:
         return crud.create_user(db=db, user=user)
     except IntegrityError:
-        db.rollback() # 資料庫回滾
-        raise HTTPException(status_code=400, detail="Username already registered (Integrity Error)")
-    except Exception as e:
         db.rollback()
-        print(f"Error creating user: {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        raise HTTPException(status_code=400, detail="Username already registered")
 
 
 @app.get("/users/me", response_model=schemas.User)
@@ -123,14 +113,10 @@ def read_todos(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(database.get_db),
-    current_user: models.User = Depends(auth.get_current_user) # 關鍵：需要登入
+    current_user: models.User = Depends(auth.get_current_user)
 ):
     """取得當前使用者的所有任務"""
-    # 這裡我們稍微修改 crud.get_todos 以支援篩選 owner_id
-    # 如果你的 crud.py 尚未支援，這裡直接寫 query 也可以
-    todos = db.query(models.Todo).filter(models.Todo.owner_id == current_user.id).offset(skip).limit(limit).all()
-
-    return todos
+    return crud.get_user_todos(db=db, user_id=current_user.id, skip=skip, limit=limit)
 
 
 @app.post("/todos/", response_model=schemas.Todo)
@@ -174,15 +160,10 @@ def update_todo(
     if db_todo is None:
         raise HTTPException(status_code=404, detail="Todo not found")
 
-    if todo_update.title is not None:
-        db_todo.title = todo_update.title
-    if todo_update.description is not None:
-        db_todo.description = todo_update.description
-    if todo_update.completed is not None:
-        db_todo.completed = todo_update.completed
-    if todo_update.order is not None:
-        db_todo.order = todo_update.order
-    
+    update_data = todo_update.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(db_todo, field, value)
+
     db.commit()
     db.refresh(db_todo)
 
