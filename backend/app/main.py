@@ -24,19 +24,20 @@ app = FastAPI(
 #  CORS 設定 (解決前後端跨域問題)
 origins = [
     "http://localhost",
-    "http://localhost:5173", # Vite 預設 port
+    "http://localhost:3000", # Next.js default port
+    "http://localhost:5173", # Vite default port
     "http://localhost:5174", # Vite alternative port
     "http://127.0.0.1:5173",
     "http://127.0.0.1:5174",
-    "https://proj-todo-ten.vercel.app" # Vercel 前端網址
+    "https://proj-todo-ten.vercel.app" # Vercel frontend URL
 ]
 
 # 設定 CORS，允許前端呼叫
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins, # 生產環境應設為特定網域
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"]
 )
 
