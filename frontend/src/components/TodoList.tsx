@@ -28,7 +28,7 @@ export const TodoList: React.FC<TodoListProps> = ({
   onReorderTodo
   }) => {
   const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'completed'>('all')
-  const { toast, showToast, ToastComponent } = useToast()
+  const { showToast, ToastComponent } = useToast()
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

@@ -99,7 +99,7 @@ export const Settings: React.FC<SettingsProps> = ({ onClose }) => {
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       {toast && (
         <Toast
-          type={toast.type}
+          toastType={toast.type}
           message={toast.message}
           onClose={() => setToast(null)}
         />

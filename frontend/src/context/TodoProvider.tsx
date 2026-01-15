@@ -1,9 +1,18 @@
 // frontend\src\context\TodoProvider.tsx
 import { useEffect, useState } from 'react'
 // 使用 'import type' 來引入型別
-import type { Todo } from '../types'
+import type { Todo, Priority } from '../types'
 import { createTodo, getTodos, updateTodo, deleteTodo, reorderTodos } from '../api/client'
 import { TodoContext } from './TodoContext'
+
+const isValidPriority = (value: string): value is Priority => {
+    return ['high', 'medium', 'low'].includes(value)
+}
+
+const convertApiTodo = (apiTodo: any): Todo => ({
+    ...apiTodo,
+    priority: apiTodo.priority && isValidPriority(apiTodo.priority) ? apiTodo.priority as Priority : undefined
+})
 
 export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     // 初始狀態直接設為 true，避免在 useEffect 裡立刻 setState 造成二次渲染
@@ -14,9 +23,9 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         getTodos()
             .then((data) => {
-                // 將 todos 依照 order 排序
+                // 將 todos 依照 order 排序並轉換類型
                 const sortedTodos = [...data].sort((a, b) => a.order - b.order)
-                setTodos(sortedTodos)
+                setTodos(sortedTodos.map(convertApiTodo))
             })
             .catch((err) => {
                 console.error("Failed to fetch todos", err)
@@ -30,8 +39,8 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const addTodo = async (title: string) => {
         try {
             const newTodo = await createTodo(title)
-            // 樂觀更新或重新抓取
-            setTodos((prev) => [ ...prev, newTodo ])
+            // 樂觀更新或重新抓取，轉換類型
+            setTodos((prev) => [ ...prev, convertApiTodo(newTodo) ])
         } catch(error) {
             console.error("Failed to create todo", error)
         }
@@ -43,8 +52,8 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // 先呼叫後端
             // 將變變命名為 updatedTodo，避免與函式名稱衝突
             const updatedTodo = await updateTodo(id, updates)
-            // 現在 updatedTodo 是正確的 Todo 物件，型別錯誤消失
-            setTodos((prev) => prev.map(todo => todo.id === id ? updatedTodo : todo))
+            // 轉換類型後更新狀態
+            setTodos((prev) => prev.map(todo => todo.id === id ? convertApiTodo(updatedTodo) : todo))
         } catch(error) {
             console.error("Failed to update todo", error)
         }
