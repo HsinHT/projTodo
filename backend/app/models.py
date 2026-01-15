@@ -24,5 +24,7 @@ class Todo(Base):
     description: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     completed: Mapped[bool] = mapped_column(Boolean, default=False)
     order: Mapped[int] = mapped_column(Integer, default=0)
+    priority: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    tags: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     owner_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     owner = relationship("User", back_populates="todos")
