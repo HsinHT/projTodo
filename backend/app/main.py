@@ -1,9 +1,12 @@
 # backend\app\main.py
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from typing import List
+import traceback
+
 # 匯入 IntegrityError 以捕捉資料庫錯誤
 from sqlalchemy.exc import IntegrityError
 
@@ -40,6 +43,19 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"]
 )
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """全局異常處理器 - 捕捉所有未處理的異常並返回 JSON 響應"""
+    error_msg = f"Unhandled exception: {exc}"
+    stack_trace = traceback.format_exc()
+    print(error_msg)
+    print(stack_trace)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error", "error": str(exc)}
+    )
 
 
 # Authentication Endpoints (認證路由)
@@ -81,7 +97,13 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(database.get_d
         return crud.create_user(db=db, user=user)
     except IntegrityError:
         db.rollback()
+        print("Registration failed: Username already registered")
         raise HTTPException(status_code=400, detail="Username already registered")
+    except Exception as e:
+        db.rollback()
+        print(f"Registration failed: {e}")
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 @app.get("/users/me", response_model=schemas.User)
